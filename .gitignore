@@ -8,3 +8,8 @@ __pycache__/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Fichiers volumineux générés par les scripts (modèles, historiques)
+*.pkl
+*.keras
+histories.json
