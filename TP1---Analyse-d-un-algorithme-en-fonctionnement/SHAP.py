@@ -3,10 +3,8 @@ import matplotlib.pyplot as plt
 import shap
 from sklearn.ensemble import RandomForestClassifier
 from trainer import X_train_sc, X_test_sc, y_train, feature_names, le
-# Modèle final
 rf_final = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=42)
 rf_final.fit(X_train_sc, y_train)
-# Explainer SHAP adapté aux forêts aléatoires
 explainer = shap.TreeExplainer(rf_final)
 shap_values = explainer.shap_values(X_test_sc)
 plt.figure()

@@ -1,0 +1,130 @@
+CAS CHOISI : A — Churn clients (IBM Telco Customer Churn)
+Dataset : 7 043 clients, 20 variables, classification binaire
+
+---------------------------------------------------------------------------------------------------------
+
+ÉTAPE 1 — CADRAGE DU PROJET
+
+Problème métier : Quelle décision business est visée ?
+Prédire si un client va résilier son abonnement télécom pour cibler les actions de rétention.
+
+KPI métier : Comment mesurer le succès côté business ?
+Taux de rétention client — réduire le churn grâce aux clients identifiés à risque.
+
+Variable cible (y) : Quelle colonne prédire ? Quelles valeurs possibles ?
+Colonne "Churn" — Yes (1) ou No (0).
+
+Type de tâche ML : Classification binaire / multi-classe / régression ?
+Classification binaire.
+
+Métrique ML principale : Accuracy ? F1-macro ? Recall ? Justifiez ce choix.
+F1-macro : le dataset est déséquilibré (26.6% de churn), l'accuracy seule serait trompeuse.
+
+Risques identifiés : Biais potentiels ? Variables sensibles ?
+gender et SeniorCitizen sont sensibles — risque de discrimination dans les offres de rétention.
+
+Niveau AI Act : Inacceptable / Haut risque / Risque limité / Minimal ?
+Risque limité — recommandation commerciale sans décision critique sur une personne physique.
+
+Pour votre cas, une erreur de type faux négatif ou faux positif est-elle plus coûteuse ? Pourquoi ?
+Le faux négatif — rater un client qui part coûte plus cher qu'envoyer une offre inutile.
+
+Quelles populations pourraient être discriminées si le modèle est biaisé ?
+Les seniors (SeniorCitizen=1) si le modèle les sur-cible avec des offres moins avantageuses.
+
+---------------------------------------------------------------------------------------------------------
+
+ÉTAPE 2 — PRÉPARATION DES DONNÉES
+
+Votre dataset est-il équilibré ? Quelle proportion de chaque classe ?
+Non : 73.4% No Churn (5 174) et 26.6% Churn (1 869).
+
+Y a-t-il des variables potentiellement sensibles (âge, localisation, genre…) ? Faut-il les exclure ?
+Oui : gender et SeniorCitizen. Conservées ici mais à évaluer via SHAP avant tout déploiement.
+
+
+---------------------------------------------------------------------------------------------------------
+
+ÉTAPE 3 — MODÉLISATION : 3 MODÈLES COMPARÉS
+
+Quel modèle obtient les meilleures performances sur votre cas ?
+La Régression Logistique : Accuracy 80.4%, F1-macro 0.739
+
+La Régression Logistique est-elle compétitive malgré sa simplicité ?
+Oui, meilleure que Random Forest (78.8%) et XGBoost (77.8%) — les relations sont linéaires ici.
+
+Quel modèle choisiriez-vous pour un déploiement en production ? Justifiez votre choix.
+La Régression Logistique : meilleures performances, interprétable, rapide, et facile à maintenir.
+
+---------------------------------------------------------------------------------------------------------
+
+ÉTAPE 4 — ÉVALUATION APPROFONDIE
+
+Identifiez les faux positifs et faux négatifs dans votre matrice de confusion.
+Faux Positif : environ 116 clients (offre inutile envoyée). Faux Négatif : environ 161 clients.
+
+Dans votre contexte métier, lequel est le plus coûteux ? Pourquoi ?
+Le faux négatif — perdre un client représente plusieurs centaines d'euros de revenu annuel perdu.
+
+Votre meilleur modèle est-il suffisant pour un déploiement réel ? Quelles garanties supplémentaires ?
+Non directement : recall Churn à 57%. Il faudrait ajuster le seuil de décision, tester SMOTE, et monitorer le drift.
+
+---------------------------------------------------------------------------------------------------------
+
+ÉTAPE 5 — EXPLICABILITÉ SHAP
+
+Quelles sont les 3 variables les plus influentes selon SHAP ?
+tenure / InternetService_Fiber optic / Contract_Two year
+
+Ces variables sont-elles cohérentes avec votre intuition métier ?
+Oui, les clients avec peu d'ancienneté ont un taux de résiliation plus élevé, la fibre déçoit davantage, et un contrat long fidélise.
+
+Si une variable sensible (âge, genre, origine…) apparaît parmi les plus importantes, que faut-il faire ?
+Tester son impact sur l'équité (disparate impact), la retirer si discriminante, ou la documenter au RGPD.
+
+---------------------------------------------------------------------------------------------------------
+
+ÉTAPE 6 — CONFORMITÉ AI ACT
+
+Niveau de risque AI Act : Inacceptable / Haut risque / Risque limité / Minimal ?
+Risque limité.
+
+Justification du niveau : Pourquoi ?
+Décision commerciale non critique — l'impact se limite à recevoir ou non une offre promotionnelle.
+
+Base légale RGPD : Consentement / Contrat / Intérêt légitime ?
+Intérêt légitime (article 6.1.f) — optimisation de la relation client.
+
+DPIA requis ? Analyse d'impact sur la vie privée nécessaire ? Pourquoi ?
+Recommandé (profilage à grande échelle), mais non obligatoire au niveau risque limité.
+
+Explicabilité requise : Le modèle doit-il justifier ses décisions ? Comment ?
+Recommandée — la Régression Logistique y répond via ses coefficients interprétables.
+
+Supervision humaine : Un humain doit-il valider chaque décision ?
+Oui pour les cas à fort impact. Les décisions de routine peuvent être automatisées.
+
+Audit et traçabilité : MLflow, versioning des modèles, logs de décisions ?
+Versioning MLflow, logs des prédictions, monitoring du taux de churn réel vs prédit.
+
+Droits des personnes : Accès, rectification, opposition aux décisions automatisées ?
+Droit d'accès, rectification, et opposition au profilage automatisé (article 21 RGPD).
+
+Votre système nécessite-t-il un audit de conformité avant déploiement ? Par qui ?
+Oui — revue interne DPO + équipe légale. Audit externe recommandé si tarifs différenciés.
+
+Les personnes affectées ont-elles un droit de recours ?
+Oui — tout client peut exiger une révision humaine.
+
+Quel organisme de contrôle surveille ce type de système dans votre secteur ?
+La CNIL (RGPD) et l'ARCEP (télécoms).
+
+---------------------------------------------------------------------------------------------------------
+
+SLIDE SYNTHÈSE
+
+CAS : A                          MODÈLE RETENU : Logistic Regression
+Accuracy : 80.4%    F1-macro : 0.739    F1-weighted : 0.800
+TOP 3 VARIABLES (SHAP) : 1. tenure    2. InternetService_Fiber optic    3. Contract_Two year
+AI ACT : Risque limité — scoring commercial sans décision critique automatisée.
+LIMITE PRINCIPALE : Recall Churn 57% — ajuster le seuil ou rééquilibrer les classes avant déploiement.
