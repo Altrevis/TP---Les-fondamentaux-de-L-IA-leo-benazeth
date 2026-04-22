@@ -63,3 +63,22 @@ Pourquoi l'explicabilité est-elle cruciale dans un contexte réglementé (médi
 Parce que les décisions doivent être justifiables : un médecin ou un établissement bancaire doit pouvoir expliquer pourquoi un diagnostic
 a été posé ou un crédit refusé. Sans explicabilité, le modèle est une boîte noire
 ce qui est interdit par certaines réglementations (ex. RGPD, droit à l'explication).
+
+---------------------------------------------------------------------------------------------------------
+
+SYNTHÈSE — 3 INSIGHTS
+
+Insight 1 — Performance
+Observation : Le Decision Tree (baseline) obtient 96.7% d'accuracy contre 93.3% pour le Random Forest sur ce jeu de données.
+Explication : Sur un dataset aussi petit et propre que l'Iris (150 échantillons, 4 variables, classes bien séparables), un modèle simple suffit. Le Random Forest ajoute de la complexité qui ne se justifie pas ici.
+Implication pratique : Toujours commencer par une baseline simple. Si elle donne de bons résultats, inutile d'aller vers des modèles plus complexes — cela économise du temps de calcul et facilite l'interprétation.
+
+Insight 2 — Overfitting / Généralisation
+Observation : L'overfitting apparaît à partir de la profondeur 5 : le score d'entraînement atteint 100% tandis que le score test plafonne à ~90%.
+Explication : L'overfitting survient quand le modèle mémorise les données d'entraînement au lieu d'en extraire des règles généralisables. Il devient trop spécialisé et échoue sur des données inédites.
+Implication pratique : Utiliser la validation croisée pour sélectionner la profondeur optimale, et limiter max_depth à 3-4 sur ce type de dataset. La courbe overfitting permet de visualiser le bon compromis biais/variance.
+
+Insight 3 — Explicabilité
+Observation : Selon SHAP, petal_length est la variable la plus déterminante, suivie de petal_width. sepal_width contribue très peu.
+Explication : C'est cohérent avec le pairplot observé dès l'exploration : les pétales séparent nettement les 3 espèces, alors que les sépales se chevauchent. SHAP confirme quantitativement ce qu'on voyait visuellement.
+Implication pratique : Dans un contexte réglementé (médical, crédit bancaire), l'explicabilité est obligatoire — le RGPD impose un droit à l'explication pour toute décision automatisée. SHAP permet de justifier chaque prédiction de façon individuelle, ce qu'une simple accuracy ne peut pas faire.
